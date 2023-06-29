@@ -31,12 +31,13 @@ def preprocess(data):
     messages = []
     for message in df['user_message']:
         entry = re.split(':\s', message)
-        if len(entry)>1:
+        if len(entry) > 1:
             users.append(entry[0])
             messages.append(': '.join(entry[1:]))
         else:
             users.append('group_notifications')
             messages.append(entry[0])
+
     df['user'] = users
     df['messages'] = messages
     df.drop(columns=['user_message'], inplace=True)

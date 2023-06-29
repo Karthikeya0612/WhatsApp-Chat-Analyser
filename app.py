@@ -5,7 +5,6 @@ import utility
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
 st.sidebar.title("WhatsApp Chat Analyzer")
 
 uploaded_file = st.sidebar.file_uploader("Choose a file")
@@ -109,7 +108,8 @@ if uploaded_file is not None:
         st.pyplot(fig)
 
         # most common words
-        most_common_words_df, emoji_df, profane_df = utility.most_common_words_emojis_and_profane_words(selected_option, df)
+        most_common_words_df, emoji_df, profane_df = utility.most_common_words_emojis_and_profane_words(selected_option,
+                                                                                                        df)
         plt.rcParams['font.family'] = 'Segoe UI Emoji'
         fig, ax = plt.subplots()
         ax.barh(most_common_words_df[0], most_common_words_df[1], color='purple')
@@ -144,8 +144,7 @@ if uploaded_file is not None:
         st.header("Most Sensitive Messages are")
         sensitive_df = utility.sensitive_messages(selected_option, df)
         if sensitive_df is None:
-            st.text("No Threatening Messages")
+            st.text("No Sensitive Messages")
         else:
             st.dataframe(sensitive_df, use_container_width=True)
-
 

@@ -113,7 +113,7 @@ def sensitive_messages(selected_user, df):
         blob = TextBlob(i)
         sentiment = blob.sentiment.polarity
 
-        threshold = -0.8  # Adjust the threshold according to requirements
+        threshold = -0.8
 
         if sentiment < threshold:
             messages.append(i)
@@ -122,3 +122,4 @@ def sensitive_messages(selected_user, df):
     if sensitive_df.shape[0] == 0:
         return None
     return sensitive_df
+
