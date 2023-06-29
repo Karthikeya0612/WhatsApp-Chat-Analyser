@@ -2,6 +2,7 @@ from urlextract import URLExtract
 from wordcloud import WordCloud
 from collections import Counter
 from better_profanity import profanity
+from textblob import TextBlob
 import pandas as pd
 import emoji
 
@@ -39,7 +40,7 @@ def create_wordcloud(selected_user, df):
     return df_wc
 
 
-def most_common_words(selected_user, df):
+def most_common_words_emojis_and_profane_words(selected_user, df):
     f = open('stop_words.txt', 'r')
     stop_words = f.read()
     if selected_user != 'Overall':
@@ -47,22 +48,25 @@ def most_common_words(selected_user, df):
     temp = df[df['user'] != 'group_notifications']
     temp = temp[temp['messages'] != '<Media omitted>\n']
     words_used = []
+    profane_words = []
+    emojis = []
     for m in temp['messages']:
         for word in m.lower().split():
             if word not in stop_words:
                 words_used.append(word)
-    return pd.DataFrame(Counter(words_used).most_common(20))
-
-
-def emoji_count(selected_user, df):
-    if selected_user != 'Overall':
-        df = df[df['user'] == selected_user]
-    emojis = []
-    for message in df['messages']:
-        emojis.extend(c for c in message if c in emoji.UNICODE_EMOJI['en'])
+            if profanity.contains_profanity(word):
+                profane_words.append(word)
+        emojis.extend(c for c in m if c in emoji.UNICODE_EMOJI['en'])
+    common_words_df = pd.DataFrame(Counter(words_used).most_common(20));
+    if len(profane_words) == 0:
+        profane_words_df = None
+    else:
+        profane_words_df = pd.DataFrame(Counter(profane_words).most_common(20))
     if len(emojis) == 0:
-        return None
-    return pd.DataFrame(Counter(emojis).most_common(len(Counter(emojis))))
+        emoji_df = None
+    else:
+        emoji_df = pd.DataFrame(Counter(emojis).most_common(len(Counter(emojis))))
+    return common_words_df, emoji_df, profane_words_df
 
 
 def monthly_timeline(selected_user, df):
@@ -100,15 +104,21 @@ def activity_heatmap(selected_user, df):
     return df.pivot_table(index='day_name', columns='period', values='messages', aggfunc='count').fillna(0)
 
 
-def profanity_check(selected_user, df):
+def sensitive_messages(selected_user, df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
-    profane_words = []
-    for m in df['messages']:
-        for word in m.lower().split():
-            if word.isalpha():
-                if profanity.contains_profanity(word):
-                    profane_words.append(word)
-    if len(profane_words) == 0:
+    user = []
+    messages = []
+    for idx, i in enumerate(df['messages']):
+        blob = TextBlob(i)
+        sentiment = blob.sentiment.polarity
+
+        threshold = -0.8  # Adjust the threshold according to requirements
+
+        if sentiment < threshold:
+            messages.append(i)
+            user.append(df['user'][idx])
+    sensitive_df = pd.DataFrame({'user': user, 'message': messages})
+    if sensitive_df.shape[0] == 0:
         return None
-    return pd.DataFrame(Counter(profane_words).most_common(20))
+    return sensitive_df

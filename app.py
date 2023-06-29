@@ -109,7 +109,8 @@ if uploaded_file is not None:
         st.pyplot(fig)
 
         # most common words
-        most_common_words_df = utility.most_common_words(selected_option, df)
+        most_common_words_df, emoji_df, profane_df = utility.most_common_words_emojis_and_profane_words(selected_option, df)
+        plt.rcParams['font.family'] = 'Segoe UI Emoji'
         fig, ax = plt.subplots()
         ax.barh(most_common_words_df[0], most_common_words_df[1], color='purple')
         plt.xticks(rotation='vertical')
@@ -117,17 +118,12 @@ if uploaded_file is not None:
         st.pyplot(fig)
 
         # emoji analysis
-        emoji_df = utility.emoji_count(selected_option, df)
         st.title("Emoji Analysis")
-
         if emoji_df is not None:
-
             col1, col2 = st.columns(2)
-
             with col1:
                 st.dataframe(emoji_df)
             with col2:
-                plt.rcParams['font.family'] = 'Segoe UI Emoji'
                 fig, ax = plt.subplots()
                 ax.pie(emoji_df[1].head(), labels=emoji_df[0].head(), autopct="%0.2f")
                 st.pyplot(fig)
@@ -135,7 +131,6 @@ if uploaded_file is not None:
             st.text("No emojis used")
 
         # profanity analysis
-        profane_df = utility.profanity_check(selected_option, df)
         st.title("Profanity Analysis")
         if profane_df is not None:
             fig, ax = plt.subplots()
@@ -144,4 +139,13 @@ if uploaded_file is not None:
             st.pyplot(fig)
         else:
             st.text("Clean Messages")
+
+        # threat analysis
+        st.header("Most Sensitive Messages are")
+        sensitive_df = utility.sensitive_messages(selected_option, df)
+        if sensitive_df is None:
+            st.text("No Threatening Messages")
+        else:
+            st.dataframe(sensitive_df, use_container_width=True)
+
 
