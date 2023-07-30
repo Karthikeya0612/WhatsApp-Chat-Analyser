@@ -6,8 +6,18 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 st.sidebar.title("WhatsApp Chat Analyzer")
-
 uploaded_file = st.sidebar.file_uploader("Choose a file")
+st.header("WhatsApp Chat Analyzer")
+if uploaded_file is None:
+    st.subheader("To export a WhatsApp chat, you can follow these steps:")
+    st.write("1. Open WhatsApp: Open the WhatsApp application on your mobile phone.")
+    st.write("2. Select Chat: Choose the chat that you want to export from the chat list.")
+    st.write("3. Open Chat Options: Tap on the three-dot menu (Android) or contact name (iOS) at the top right corner of the chat.")
+    st.write("4. Select More Options: In the dropdown menu (Android) or from the contact info page (iOS), choose 'More' or 'Chat Export' option.")
+    st.write("5. Choose Export Type: WhatsApp will ask you to choose the export type, select without media")
+    st.write("6. Select Export Destination: Choose the destination folder to export the chat.")
+    st.write("7. Upload the exported file in the sidebar.")
+
 if uploaded_file is not None:
     # To read file as bytes:
     bytes_data = uploaded_file.getvalue()
@@ -26,6 +36,8 @@ if uploaded_file is not None:
 
     if st.sidebar.button("Show Analysis"):
         # stats area
+        st.write("These are the Analysis:")
+
         num_messages, words, num_media, num_links = utility.fetch_stats(selected_option, df)
 
         st.title('Top Statistics')
@@ -147,4 +159,5 @@ if uploaded_file is not None:
             st.text("No Sensitive Messages")
         else:
             st.dataframe(sensitive_df, use_container_width=True)
-
+    else:
+        st.write("Please click on show analysis button on sidebar")
